@@ -1,10 +1,20 @@
 from django.shortcuts import render
-from .models import Individual, Organisation
+from .models import *
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 
 # Create your views here.
+
+
+def getUIDByName(username, type="Individual"):
+    if type == "Individual" or type == "Organisation":
+        try:
+            return Individual.objects.get(username=username).UID if type == "Individual" else Organisation.objects.get(username=username).UID
+        except:
+            return "Username does not exists"
+    else:
+        return "Invalid Type"
 
 
 def profile(request, usr_id):
@@ -16,39 +26,39 @@ def profile(request, usr_id):
 
 
 def getUser(request):
-    print("-------------------\n", request.GET)
-    uid = request.GET['UID']
-    type = request.GET['type']
-    # print(uid, type)
-    if type == 'Individual':
-        target = Individual
-    elif type == 'Organisation':
-        target = Organisation
-    else:
-        return JsonResponse({'code': 404, 'message': 'Invalid type provided.'})
-    try:
-        resp = target.objects.get(UID=uid)
-    except target.DoesNotExist:
-        return JsonResponse({'code': 404, 'message': 'No entry found.'})
-    return JsonResponse(resp.Serialize())
+    if request.method == 'GET':
+        uid = request.GET['UID']
+        type = request.GET['type']
+        # print(uid, type)
+        if type == 'Individual':
+            target = Individual
+        elif type == 'Organisation':
+            target = Organisation
+        else:
+            return JsonResponse({'code': 404, 'message': 'Invalid type provided.'})
+        try:
+            resp = target.objects.get(UID=uid)
+        except target.DoesNotExist:
+            return JsonResponse({'code': 404, 'message': 'No entry found.'})
+        return JsonResponse(resp.Serialize())
 
 
 def getUserInfo(request):
-    print("-------------------\n", request.GET)
-    username = request.GET['username']
-    type = request.GET['type']
-    # print(uid, type)
-    if type == 'Individual':
-        target = Individual
-    elif type == 'Organisation':
-        target = Organisation
-    else:
-        return JsonResponse({'code': 404, 'message': 'Invalid type provided.'})
-    try:
-        resp = target.objects.get(username=username)
-    except target.DoesNotExist:
-        return JsonResponse({'code': 404, 'message': 'No entry found.'})
-    return JsonResponse(resp.SerializePartial())
+    if request.method == 'GET':
+        username = request.GET['username']
+        type = request.GET['type']
+        # print(uid, type)
+        if type == 'Individual':
+            target = Individual
+        elif type == 'Organisation':
+            target = Organisation
+        else:
+            return JsonResponse({'code': 404, 'message': 'Invalid type provided.'})
+        try:
+            resp = target.objects.get(username=username)
+        except target.DoesNotExist:
+            return JsonResponse({'code': 404, 'message': 'No entry found.'})
+        return JsonResponse(resp.SerializePartial())
 
 
 # Work Under progress
@@ -56,14 +66,15 @@ def getUserInfo(request):
 @csrf_exempt
 def register(request):
     # print(request.body)
-    data = json.loads(request.body)
-    try:
-        if data['type'] == 'Individual' or data['type'] == 'Organisation':
-            return registerIndividual(data['info']) if data['type'] == 'Individual' else registerOrganisation(data['info'])
-        else:
-            return JsonResponse({'code': 420, 'message': 'Invalid type provided'})
-    except:
-        return JsonResponse({'code': 69, 'message': 'Type not provided'})
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        try:
+            if data['type'] == 'Individual' or data['type'] == 'Organisation':
+                return registerIndividual(data['info']) if data['type'] == 'Individual' else registerOrganisation(data['info'])
+            else:
+                return JsonResponse({'code': 420, 'message': 'Invalid type provided'})
+        except:
+            return JsonResponse({'code': 69, 'message': 'Type not provided'})
 
 
 def registerIndividual(info):
@@ -84,3 +95,41 @@ def registerOrganisation(info):
         return JsonResponse({'message': 'registration successful'})
     except:
         return JsonResponse({'message': 'registration failure'})
+
+
+@csrf_exempt
+def createBulkJob(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        org_uid = str(getUIDByName(
+            data['username'], "Organisation")).replace('-', '')
+        if org_uid != "Username does not exists" and org_uid != "Invalid Type":
+            try:
+                bj = BulkJob.objects.create(
+                    title=data['title'], noOfEmployees=data['noOfEmployees'], description=data['description'])
+                try:
+                    OBJ.objects.create(UID_id=org_uid, BID_id=bj.BID)
+                    return JsonResponse({"message": "BulkJob created successfully"})
+                except:
+                    BulkJob.objects.get(BID=bj.BID).delete()
+                    return JsonResponse({"message": "BulkJob connector error"})
+            except:
+                return JsonResponse({"message": "error occured while creating BulkJob"})
+        else:
+            return JsonResponse({"message": "Unable to find the Organisation"})
+
+
+@csrf_exempt
+def connectBulkJob(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        ind_uid = str(getUIDByName(
+            data['username'], "Individual")).replace('-', '')
+        if ind_uid != "Username does not exists" and ind_uid != "Invalid Type":
+            try:
+                EBJ.objects.create(UID_id=ind_uid, BID_id=data['BID'])
+                return JsonResponse({"message": "Connected with BulkJob successfully"})
+            except:
+                return JsonResponse({"message": "error occured while connecting with BulkJob"})
+        else:
+            return JsonResponse({"message": "Unable to find the Individual"})

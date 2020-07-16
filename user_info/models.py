@@ -215,7 +215,7 @@ class EBJ(models.Model):
     UID = models.ForeignKey(Individual, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.BID.title + " " + self.UID.firstName + " " + self.UID.lastName
+        return self.BID.title + " " + self.UID.username
 
     class Meta:
         verbose_name = 'Employee to Bulk Job Connector'
@@ -227,7 +227,7 @@ class OBJ(models.Model):
     BID = models.ForeignKey(BulkJob, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.BID.title + " " + self.UID.name
+        return self.BID.title + " " + self.UID.username
 
     class Meta:
         verbose_name = 'Organisation to Bulk Job Connector'
@@ -250,7 +250,7 @@ class ReviewConnector(models.Model):
     targetID = models.CharField(max_length=len_vsml)
 
     def __str__(self):
-        return self.UID.firstName + " to " + self.targetID.name
+        return self.UID.username + " to " + self.targetID.username
 
     class Meta:
         verbose_name = 'Review Connector'
@@ -262,7 +262,7 @@ class Follows(models.Model):
     OrganisationID = models.ForeignKey(Organisation, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.UID.firstName + " follows " + self.OrganisationID.name
+        return self.UID.username + " follows " + self.OrganisationID.organisationName
 
     class Meta:
         verbose_name = 'Follows'
