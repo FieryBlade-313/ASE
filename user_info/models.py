@@ -48,7 +48,7 @@ class Individual(User, Address):
     firstName = models.CharField(max_length=len_sml, blank=False, default=None)
     middleName = models.CharField(max_length=len_sml, blank=True)
     lastName = models.CharField(max_length=len_sml, blank=False, default=None)
-    profile_pic = models.FileField()
+    profile_pic = models.FileField(blank=True)
     DOB = models.DateField()
     DOJ = models.DateField()
     age = models.IntegerField()
@@ -87,7 +87,7 @@ class Individual(User, Address):
 
 class Organisation(User, Address):
     organisationName = models.CharField(max_length=len_lrg, blank=False)
-    organisationLogo = models.FileField()
+    organisationLogo = models.FileField(blank=True)
     description = models.TextField()
 
     def __str__(self):

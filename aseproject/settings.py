@@ -77,7 +77,7 @@ WSGI_APPLICATION = 'aseproject.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'ase',
+        'NAME': 'test',
         'USER': 'ase',
         'PASSWORD': 'Fiery@12345',
         'HOST': 'localhost',
