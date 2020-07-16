@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 from django.core.validators import RegexValidator, MaxValueValidator, MinValueValidator
 
@@ -12,7 +13,8 @@ len_uuid = 36
 
 
 class User(models.Model):
-    UID = models.CharField(max_length=len_vsml, primary_key=True)
+    UID = models.UUIDField(
+        primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     password = models.CharField(max_length=len_med, blank=False, default=None)
     email = models.EmailField(max_length=254, blank=False, default=None)
     username = models.CharField(max_length=len_med, blank=False, default=None)
@@ -115,7 +117,7 @@ class Organisation(User, Address):
 
 
 class Category(models.Model):
-    CID = models.CharField(max_length=len_sml, primary_key=True)
+    CID = models.AutoField(primary_key=True)
     name = models.CharField(max_length=len_xsml)
 
     def __str__(self):
@@ -127,7 +129,7 @@ class Category(models.Model):
 
 
 class Jobs(models.Model):
-    JID = models.CharField(max_length=len_sml, primary_key=True)
+    JID = models.AutoField(primary_key=True)
     CID = models.ForeignKey(Category, on_delete=models.CASCADE, null=True)
     name = models.CharField(max_length=len_xsml)
 
@@ -140,7 +142,7 @@ class Jobs(models.Model):
 
 
 class FOI(models.Model):
-    UID = models.CharField(max_length=len_vsml)
+    UID = models.CharField(max_length=len_uuid)
     JID = models.ForeignKey(Jobs, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -152,7 +154,7 @@ class FOI(models.Model):
 
 
 class JobsAvailable(models.Model):
-    UID = models.CharField(max_length=len_sml)
+    UID = models.CharField(max_length=len_uuid)
     JID = models.ForeignKey(Jobs, on_delete=models.CASCADE)
     basePay = models.FloatField()
     timePeriodOfService = models.DurationField()
@@ -169,7 +171,7 @@ class JobsAvailable(models.Model):
 
 
 class BulkJob(models.Model):
-    BID = models.CharField(max_length=len_vsml, primary_key=True)
+    BID = models.AutoField(primary_key=True)
     title = models.CharField(max_length=len_xsml)
     noOfEmployees = models.PositiveIntegerField()
     description = models.TextField()
@@ -207,7 +209,7 @@ class OBJ(models.Model):
 
 
 class Review(models.Model):
-    RID = models.CharField(max_length=len_vsml, primary_key=True)
+    RID = models.AutoField(primary_key=True)
     content = models.TextField()
     rating = models.FloatField(
         validators=[MinValueValidator(0.0), MaxValueValidator(5.0)])
@@ -218,7 +220,7 @@ class Review(models.Model):
 
 class ReviewConnector(models.Model):
     RID = models.ForeignKey(Review, on_delete=models.CASCADE)
-    UID = models.CharField(max_length=len_vsml)
+    UID = models.CharField(max_length=len_uuid)
     targetID = models.CharField(max_length=len_vsml)
 
     def __str__(self):
