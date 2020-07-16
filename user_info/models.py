@@ -16,8 +16,10 @@ class User(models.Model):
     UID = models.UUIDField(
         primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     password = models.CharField(max_length=len_med, blank=False, default=None)
-    email = models.EmailField(max_length=254, blank=False, default=None)
-    username = models.CharField(max_length=len_med, blank=False, default=None)
+    email = models.EmailField(
+        max_length=254, blank=False, default=None, unique=True)
+    username = models.CharField(
+        max_length=len_med, blank=False, default=None, unique=True)
     contact_regex = RegexValidator(
         regex=r'^\+?1?\d{9,15}$', message="Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.")
     contactNo = models.CharField(
@@ -50,7 +52,7 @@ class Individual(User, Address):
     firstName = models.CharField(max_length=len_sml, blank=False, default=None)
     middleName = models.CharField(max_length=len_sml, blank=True)
     lastName = models.CharField(max_length=len_sml, blank=False, default=None)
-    profile_pic = models.FileField(blank=True)
+    profile_pic = models.FileField(blank=True, default=None, null=True)
     DOB = models.DateField()
     DOJ = models.DateField()
     age = models.IntegerField()
@@ -76,11 +78,25 @@ class Individual(User, Address):
                 'middleName': self.middleName,
                 'lastName': self.lastName,
             },
-            'profilePic': self.profile_pic.path,
+            'profilePic': self.profile_pic.path if self.profile_pic else "None",
             'DOB': self.DOB,
             'DOJ': self.DOJ,
             'age': self.age,
             'gender': self.gender,
+        }
+
+    def SerializePartial(self):
+        return {
+            'UID': self.UID,
+            'username': self.username,
+            'email': self.email,
+            'contactNo': self.contactNo,
+            'name': {
+                'firstName': self.firstName,
+                'middleName': self.middleName,
+                'lastName': self.lastName,
+            },
+            'profilePic': self.profile_pic.path if self.profile_pic else "None",
         }
 
     def __str__(self):
@@ -89,11 +105,11 @@ class Individual(User, Address):
 
 class Organisation(User, Address):
     organisationName = models.CharField(max_length=len_lrg, blank=False)
-    organisationLogo = models.FileField(blank=True)
+    organisationLogo = models.FileField(blank=True, default=None, null=True)
     description = models.TextField()
 
     def __str__(self):
-        return self.organisationName
+        return self.organisationName + " " + self.username
 
     def Serialize(self):
         return {
@@ -111,8 +127,18 @@ class Organisation(User, Address):
                 'country': self.country,
             },
             'name': self.organisationName,
-            'logo': self.organisationLogo.path,
+            'logo': self.organisationLogo.path if self.organisationLogo else "None",
             'description': self.description,
+        }
+
+    def SerializePartial(self):
+        return {
+            'UID': self.UID,
+            'username': self.username,
+            'email': self.email,
+            'contactNo': self.contactNo,
+            'name': self.organisationName,
+            'logo': self.organisationLogo.path if self.organisationLogo else "None",
         }
 
 
