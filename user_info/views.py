@@ -224,3 +224,52 @@ def login(request):
             return JsonResponse({"message": "login successful"}) if usr_pass == data['password'] else JsonResponse({'message': 'Invalid password'})
         except:
             return JsonResponse({'message': 'Username not found'})
+
+
+@csrf_exempt
+def review(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        usr_uid = getUIDfromBoth(data['username'])
+        tar_uid = getUIDfromBoth(data['target_username'])
+        if usr_uid != "No registered user with the given username" and tar_uid != "No registered user with the given username":
+            try:
+                rw = Review.objects.create(
+                    content=data["content"], rating=data["rating"])
+                try:
+                    ReviewConnector.objects.create(
+                        RID_id=rw.RID, UID=usr_uid, targetID=tar_uid)
+                    return JsonResponse({"message": "Review added successfully"})
+                except:
+                    rw.delete()
+                    return JsonResponse({"message": "Error connecting the review"})
+            except:
+                return JsonResponse({"message": "Error while creating a review"})
+        else:
+            return JsonResponse({"message": "Invalid username or target_username provided"})
+    elif request.method == 'GET':
+        return getAllReviews(request)
+
+
+def getAllReviews(request):
+    usr_uid = getUIDfromBoth(
+        request.GET['username']) if 'username' in request.GET else None
+    tar_uid = getUIDfromBoth(
+        request.GET['target_username']) if 'target_username' in request.GET else None
+    if usr_uid != "No registered user with the given username" and tar_uid != "No registered user with the given username":
+        resp = []
+        if usr_uid != None and tar_uid != None:
+            resp = ReviewConnector.objects.filter(
+                UID=usr_uid, targetID=tar_uid)
+        elif usr_uid != None:
+            resp = ReviewConnector.objects.filter(UID=usr_uid)
+        elif tar_uid != None:
+            resp = ReviewConnector.objects.filter(targetID=tar_uid)
+        else:
+            return JsonResponse({"reviews": resp})
+
+        resp = [a.RID.Serialize() for a in resp]
+
+        return JsonResponse({"reviews": resp})
+    else:
+        return JsonResponse({"message": "Invalid username or target_username provided"})

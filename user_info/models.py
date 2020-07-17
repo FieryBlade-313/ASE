@@ -266,6 +266,13 @@ class Review(models.Model):
     def __str__(self):
         return str(self.RID) + " " + self.content
 
+    def Serialize(self):
+        return {
+            "RID": self.RID,
+            "content": self.content,
+            "rating": self.rating
+        }
+
 
 class ReviewConnector(models.Model):
     RID = models.ForeignKey(Review, on_delete=models.CASCADE)
