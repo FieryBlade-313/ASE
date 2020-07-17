@@ -167,7 +167,7 @@ This repo consists the backend of our ASE project, created by Sathya and Fauz.
    
    This API return all the Jobs that are linked with Category having `~category_name~` as their name.
    
-* #### rReview API
+* #### Review API
    * `http://127.0.0.1:8000/api/review/` (POST request)
    
    POST request body structure -
@@ -191,5 +191,42 @@ This repo consists the backend of our ASE project, created by Sathya and Fauz.
    
    * `http://127.0.0.1:8000/api/review/?target_username=~usr1~` (GET request)
    
-   This API return all reviews given to `~usr2~`.
+   This API return all reviews given to `~usr2~`. 
+   
+* #### Follow API  
+    * `http://127.0.0.1:8000/api/follows/` (POST Request)
+    
+    POST request body structure -
+   
+    * This API allows Individuals to Follow the Organisations they are interested in or associated with   
+   <pre>
+   {
+      "UserName":"JohnDoe",
+      "OrgName":"Test"
+   }
+   </pre>
+   
+   * `http://127.0.0.1:8000/api/follows/` (GET Request)  
+     
+     This API returns details of all individuals and the corresponding organisations that they follow   
+     
+   
+* #### Field Of Interest API  
+   * `http://127.0.0.1:8000/api/foi/` (POST Request)
+    
+    POST request body structure -
+   
+   * This API allows Registered Individuals or Organisations to select the Job they are interested in.
+         
+   <pre>
+   {
+      "UserName":"JohnDoe",
+      "JID":"J01"
+   }
+   </pre>
+   
+   * `http://127.0.0.1:8000/api/foi/` (GET Request)  
+     
+     This API details of all Registered Individuals or Organisations and their corresponding job.
+     
    
