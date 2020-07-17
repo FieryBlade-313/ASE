@@ -100,7 +100,7 @@ class Individual(User, Address):
         }
 
     def __str__(self):
-        return self.firstName + " " + self.middleName + " " + self.lastName
+        return self.username
 
 
 class Organisation(User, Address):
@@ -144,7 +144,7 @@ class Organisation(User, Address):
 
 class Category(models.Model):
     CID = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=len_xsml)
+    name = models.CharField(max_length=len_xsml, unique=True)
 
     def __str__(self):
         return self.name
@@ -153,11 +153,17 @@ class Category(models.Model):
         verbose_name = 'Category'
         verbose_name_plural = 'Categories'
 
+    def Serialize(self):
+        return {
+            'CID': self.CID,
+            'name': self.name
+        }
+
 
 class Jobs(models.Model):
     JID = models.AutoField(primary_key=True)
     CID = models.ForeignKey(Category, on_delete=models.CASCADE, null=True)
-    name = models.CharField(max_length=len_xsml)
+    name = models.CharField(max_length=len_xsml, unique=True)
 
     def __str__(self):
         return self.name
@@ -165,6 +171,12 @@ class Jobs(models.Model):
     class Meta:
         verbose_name = 'Jobs'
         verbose_name_plural = 'Jobs'
+
+    def Serialize(self):
+        return {
+            'JID': self.JID,
+            'name': self.name
+        }
 
 
 class FOI(models.Model):

@@ -7,6 +7,16 @@ import json
 # Create your views here.
 
 
+def getUIDfromBoth(username):
+    try:
+        return Individual.objects.get(username=username).UID
+    except:
+        try:
+            return Organisation.objects.get(username=username).UID
+        except:
+            return "No registered user with the given username"
+
+
 def getUIDByName(username, type="Individual"):
     if type == "Individual" or type == "Organisation":
         try:
@@ -15,6 +25,13 @@ def getUIDByName(username, type="Individual"):
             return "Username does not exists"
     else:
         return "Invalid Type"
+
+
+def getCIDbyName(name):
+    try:
+        return Category.objects.get(name=name).CID
+    except:
+        return "No category found"
 
 
 def profile(request, usr_id):
@@ -62,19 +79,33 @@ def getUserInfo(request):
 
 
 # Work Under progress
+def checkUsernameExists(username):
+    try:
+        Individual.objects.get(username=username)
+        return True
+    except:
+        try:
+            Organisation.objects.get(username=username)
+            return True
+        except:
+            return False
+
 
 @csrf_exempt
 def register(request):
     # print(request.body)
     if request.method == 'POST':
         data = json.loads(request.body)
-        try:
-            if data['type'] == 'Individual' or data['type'] == 'Organisation':
-                return registerIndividual(data['info']) if data['type'] == 'Individual' else registerOrganisation(data['info'])
-            else:
-                return JsonResponse({'code': 420, 'message': 'Invalid type provided'})
-        except:
-            return JsonResponse({'code': 69, 'message': 'Type not provided'})
+        if not checkUsernameExists(data['info']['username']):
+            try:
+                if data['type'] == 'Individual' or data['type'] == 'Organisation':
+                    return registerIndividual(data['info']) if data['type'] == 'Individual' else registerOrganisation(data['info'])
+                else:
+                    return JsonResponse({'code': 420, 'message': 'Invalid type provided'})
+            except:
+                return JsonResponse({'code': 69, 'message': 'Type not provided'})
+        else:
+            return JsonResponse({"message": "Username already exists"})
 
 
 def registerIndividual(info):
@@ -133,3 +164,33 @@ def connectBulkJob(request):
                 return JsonResponse({"message": "error occured while connecting with BulkJob"})
         else:
             return JsonResponse({"message": "Unable to find the Individual"})
+
+
+def getJobsByCategory(request):
+    if request.method == 'GET':
+        cat_name = request.GET['cat_name']
+        cid = getCIDbyName(cat_name)
+        if cid != "No category found":
+            try:
+                jobs = Jobs.objects.filter(CID_id=cid)
+                resp = [a.Serialize() for a in jobs]
+                return JsonResponse({'cat_name': cat_name, 'Jobs': resp})
+            except:
+                return JsonResponse({'message': 'Error while fetching Jobs'})
+        else:
+            return JsonResponse({'message': 'No category found'})
+
+
+@csrf_exempt
+def login(request):
+    data = json.loads(request.body)
+    try:
+        usr_pass = Individual.objects.get(username=data['username']).password
+        return JsonResponse({"message": "login successful"}) if usr_pass == data['password'] else JsonResponse({'message': 'Invalid password'})
+    except:
+        try:
+            usr_pass = Organisation.objects.get(
+                username=data['username']).password
+            return JsonResponse({"message": "login successful"}) if usr_pass == data['password'] else JsonResponse({'message': 'Invalid password'})
+        except:
+            return JsonResponse({'message': 'Username not found'})
