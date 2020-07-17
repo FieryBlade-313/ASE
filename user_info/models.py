@@ -176,7 +176,7 @@ class Jobs(models.Model):
     name = models.CharField(max_length=len_xsml, unique=True)
 
     def __str__(self):
-        return self.name
+        return str(self.JID) + " " + self.name
 
     class Meta:
         verbose_name = 'Jobs'
@@ -207,7 +207,7 @@ class JobsAvailable(models.Model):
     JID = models.ForeignKey(Jobs, on_delete=models.CASCADE)
     basePay = models.FloatField()
     timePeriodOfService = models.DurationField()
-    negotiable = models.BinaryField()
+    negotiable = models.BooleanField(default=False)
     DOP = models.DateField()
     noOfRequiredPersonnel = models.PositiveIntegerField()
 
@@ -218,6 +218,17 @@ class JobsAvailable(models.Model):
     class Meta:
         verbose_name = 'Jobs Available'
         verbose_name_plural = 'Jobs Available'
+
+    def Serialize(self):
+        return {
+            'JID': self.JID.JID,
+            'name': self.JID.name,
+            'basePay': self.basePay,
+            "time_period_of_service": self.timePeriodOfService,
+            "negotiable": self.negotiable,
+            "DOP": self.DOP,
+            "no_of_personnel": self.noOfRequiredPersonnel
+        }
 
 
 class BulkJob(models.Model):

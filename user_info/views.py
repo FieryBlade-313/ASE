@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from .models import *
+import datetime
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
@@ -273,3 +274,41 @@ def getAllReviews(request):
         return JsonResponse({"reviews": resp})
     else:
         return JsonResponse({"message": "Invalid username or target_username provided"})
+
+
+@csrf_exempt
+def createJob(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        usr_uid = getUIDfromBoth(data['username'])
+        cid = getCIDbyName(data['category_name'])
+        if usr_uid != "No registered user with the given username" and cid != "No category found":
+            try:
+                jb = Jobs.objects.create(CID_id=cid, name=data["name"])
+                try:
+                    # print(data)
+                    tim = data["time_period_of_service"]
+                    dur = datetime.timedelta(
+                        days=tim["days"], hours=tim["hours"], minutes=tim["minutes"], seconds=tim["seconds"])
+                    JobsAvailable.objects.create(UID=usr_uid, JID_id=jb.JID, basePay=data['base_pay'], timePeriodOfService=dur,
+                                                 negotiable=data["negotiable"], DOP=data["DOP"], noOfRequiredPersonnel=data["no_of_personnel"])
+                    return JsonResponse({"message": "Created Job successfully"})
+                except:
+                    jb.delete()
+                    return JsonResponse({"message": "Failed to create entry in JobsAvailable"})
+            except:
+                return JsonResponse({"message": "Failed to create Job entry"})
+        else:
+            return JsonResponse({"message": "Invalid username or Category Name"})
+
+
+def getJobsByUser(request):
+    if request.method == "GET":
+        uid = getUIDfromBoth(request.GET['username'])
+        if uid != "No registered user with the given username":
+            resp = JobsAvailable.objects.filter(UID=uid)
+            resp = [a.Serialize() for a in resp]
+            print(resp)
+            return JsonResponse({"Jobs": resp})
+        else:
+            return JsonResponse({"message": "Invalid username"})
