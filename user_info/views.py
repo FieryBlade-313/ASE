@@ -69,8 +69,8 @@ def getUser(request):
 
 def getUserInfo(request):
     if request.method == 'GET':
-        uid = request.GET['UID']
-        resp = getUserFromUID(uid)
+        username = request.GET['username']
+        resp = getUserFromUID(getUIDfromBoth(username))
         if resp != "Unable to find":
             return JsonResponse(resp.SerializePartial())
         else:
