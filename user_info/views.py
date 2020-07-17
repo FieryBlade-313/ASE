@@ -4,6 +4,10 @@ import datetime
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
+from .serializers import FollowsSerializer, FOISerializer
+from rest_framework.views import APIView
+from rest_framework import status
+from rest_framework.response import Response
 
 # Create your views here.
 
@@ -225,6 +229,87 @@ def login(request):
             return JsonResponse({"message": "login successful"}) if usr_pass == data['password'] else JsonResponse({'message': 'Invalid password'})
         except:
             return JsonResponse({'message': 'Username not found'})
+
+
+class FollowsList(APIView):
+
+    def get(self, request):
+        data = Follows.objects.all()
+        data_serialize = FollowsSerializer(data, many=True)
+        return Response(data_serialize.data)
+
+    def post(self, request):
+
+        user_name = request.data['UserName']
+        org_name = request.data['OrgName']
+
+        try:
+            user_obj = Individual.objects.get(username=user_name)
+        except:
+            return Response({'message': 'No Individual Exists'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            org_obj = Organisation.objects.get(username=org_name)
+        except:
+            return Response({'message': 'No Organisation Exists'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            follows_obj = Follows.objects.get(
+                UID_id=user_obj.UID, OrganisationID_id=org_obj.UID)
+        except Exception as e:
+            print(e)
+            request.data['UID'] = user_obj.UID
+            request.data['OrganisationID'] = org_obj.UID
+            follows_data = FollowsSerializer(data=request.data)
+            if follows_data.is_valid():
+                follows_data.save()
+                return Response(follows_data.data, status=status.HTTP_201_CREATED)
+            return Response(follows_data.errors, status=status.HTTP_400_BAD_REQUEST)
+        print(follows_obj is None)
+        return Response({'message': 'Already exists'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class FOIList(APIView):
+
+    def get(self, request):
+
+        data = FOI.objects.all()
+        data_serialize = FOISerializer(data, many=True)
+        return Response(data_serialize.data)
+
+    def post(self, request):
+
+        user_name = request.data['UserName']
+        JID = request.data['JID']
+        print(request.data)
+        try:
+            UID = Individual.objects.get(username=user_name).UID
+        except:
+            try:
+                UID = Organisation.objects.get(username=user_name).UID
+            except:
+                UID = None
+        if UID is None:
+            return Response({'message': 'No user'}, status=status.HTTP_400_BAD_REQUEST)
+        request.data['UID'] = UID
+        try:
+            job_object = Jobs.objects.get(JID=JID)
+        except:
+            return Response({'message': 'No Jobs'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            foi_object = FOI.objects.get(UID=UID, JID=JID)
+        except:
+            foi_object = None
+
+        if foi_object is not None:
+            return Response({'message': 'This is your field of interest'}, status=status.HTTP_400_BAD_REQUEST)
+
+        foi_data = FOISerializer(data=request.data)
+        if foi_data.is_valid():
+            foi_data.save()
+            return Response(foi_data.data, status=status.HTTP_201_CREATED)
+        return Response(foi_data.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @csrf_exempt
