@@ -21,6 +21,16 @@ def getUIDfromBoth(username):
             return "No registered user with the given username"
 
 
+def getUserFromUID(uid):
+    try:
+        return Individual.objects.get(UID=uid)
+    except:
+        try:
+            return Organisation.objects.get(UID=uid)
+        except:
+            return "Unable to find"
+
+
 def getUIDByName(username, type="Individual"):
     if type == "Individual" or type == "Organisation":
         try:
@@ -49,6 +59,26 @@ def profile(request, usr_id):
 def getUser(request):
     if request.method == 'GET':
         uid = request.GET['UID']
+        resp = getUserFromUID(uid)
+        if resp != "Unable to find":
+            return JsonResponse(resp.Serialize())
+        else:
+            return JsonResponse({"message": resp})
+
+
+def getUserInfo(request):
+    if request.method == 'GET':
+        uid = request.GET['UID']
+        resp = getUserFromUID(uid)
+        if resp != "Unable to find":
+            return JsonResponse(resp.SerializePartial())
+        else:
+            return JsonResponse({"message": resp})
+
+
+def getUserbyType(request):
+    if request.method == 'GET':
+        uid = request.GET['UID']
         type = request.GET['type']
         # print(uid, type)
         if type == 'Individual':
@@ -64,7 +94,7 @@ def getUser(request):
         return JsonResponse(resp.Serialize())
 
 
-def getUserInfo(request):
+def getUserInfobyType(request):
     if request.method == 'GET':
         username = request.GET['username']
         type = request.GET['type']
@@ -199,7 +229,6 @@ def login(request):
         except:
             return JsonResponse({'message': 'Username not found'})
 
-
 class FollowsList(APIView):
 
     def get(self,request):
@@ -279,3 +308,52 @@ class FOIList(APIView):
             foi_data.save()
             return Response(foi_data.data, status=status.HTTP_201_CREATED)
         return Response(foi_data.errors,status=status.HTTP_400_BAD_REQUEST)
+
+@csrf_exempt
+def review(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        usr_uid = getUIDfromBoth(data['username'])
+        tar_uid = getUIDfromBoth(data['target_username'])
+        if usr_uid != "No registered user with the given username" and tar_uid != "No registered user with the given username":
+            try:
+                rw = Review.objects.create(
+                    content=data["content"], rating=data["rating"])
+                try:
+                    ReviewConnector.objects.create(
+                        RID_id=rw.RID, UID=usr_uid, targetID=tar_uid)
+                    return JsonResponse({"message": "Review added successfully"})
+                except:
+                    rw.delete()
+                    return JsonResponse({"message": "Error connecting the review"})
+            except:
+                return JsonResponse({"message": "Error while creating a review"})
+        else:
+            return JsonResponse({"message": "Invalid username or target_username provided"})
+    elif request.method == 'GET':
+        return getAllReviews(request)
+
+
+def getAllReviews(request):
+    usr_uid = getUIDfromBoth(
+        request.GET['username']) if 'username' in request.GET else None
+    tar_uid = getUIDfromBoth(
+        request.GET['target_username']) if 'target_username' in request.GET else None
+    if usr_uid != "No registered user with the given username" and tar_uid != "No registered user with the given username":
+        resp = []
+        if usr_uid != None and tar_uid != None:
+            resp = ReviewConnector.objects.filter(
+                UID=usr_uid, targetID=tar_uid)
+        elif usr_uid != None:
+            resp = ReviewConnector.objects.filter(UID=usr_uid)
+        elif tar_uid != None:
+            resp = ReviewConnector.objects.filter(targetID=tar_uid)
+        else:
+            return JsonResponse({"reviews": resp})
+
+        resp = [a.RID.Serialize() for a in resp]
+
+        return JsonResponse({"reviews": resp})
+    else:
+        return JsonResponse({"message": "Invalid username or target_username provided"})
+

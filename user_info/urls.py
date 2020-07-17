@@ -12,5 +12,6 @@ urlpatterns = [
     path('connectBulkJob/', views.connectBulkJob, name='Bulk Job connector API'),
     path('jobsCategory/', views.getJobsByCategory, name='Jobs by Category API'),
     path('follows/', views.FollowsList.as_view(), name='Follow API'),
-    path('foi/', views.FOIList.as_view(), name='Field Of Interest API')
+    path('foi/', views.FOIList.as_view(), name='Field Of Interest API'),
+    path('review/', views.review, name='Create Review API')
 ]
