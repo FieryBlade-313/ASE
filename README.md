@@ -29,7 +29,6 @@ This repo consists the backend of our ASE project, created by Sathya and Fauz.
     `http://127.0.0.1:8000/api/register/` (POST request)
     
     POST request body structure -
-  <pre></pre>
   1. ##### For Individual
    <pre>
    {
