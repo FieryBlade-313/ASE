@@ -15,6 +15,5 @@ urlpatterns = [
     path('job/', views.createJob, name='Create Job API'),
     path('getJobsUser/', views.getJobsByUser, name='Get Job by User API'),
     path('follows/', views.FollowsList.as_view(), name='Follow API'),
-    path('foi/', views.FOIList.as_view(), name='Field Of Interest API'),
-    path('review/', views.review, name='Create Review API')
+    path('foi/', views.FOIList.as_view(), name='Field Of Interest API')
 ]
