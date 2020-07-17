@@ -12,6 +12,16 @@ len_vsml = 10
 len_uuid = 36
 
 
+def getUserFromUID(uid):
+    try:
+        return Individual.objects.get(UID=uid)
+    except:
+        try:
+            return Organisation.objects.get(UID=uid)
+        except:
+            return "Unable to find"
+
+
 class User(models.Model):
     UID = models.UUIDField(
         primary_key=True, default=uuid.uuid4, editable=False, unique=True)
@@ -201,7 +211,8 @@ class JobsAvailable(models.Model):
     noOfRequiredPersonnel = models.PositiveIntegerField()
 
     def __str__(self):
-        return self.UID+" "+self.JID.name
+        usr = getUserFromUID(self.UID)
+        return usr.username+" "+self.JID.name
 
     class Meta:
         verbose_name = 'Jobs Available'
@@ -253,16 +264,18 @@ class Review(models.Model):
         validators=[MinValueValidator(0.0), MaxValueValidator(5.0)])
 
     def __str__(self):
-        return self.RID
+        return str(self.RID) + " " + self.content
 
 
 class ReviewConnector(models.Model):
     RID = models.ForeignKey(Review, on_delete=models.CASCADE)
     UID = models.CharField(max_length=len_uuid)
-    targetID = models.CharField(max_length=len_vsml)
+    targetID = models.CharField(max_length=len_uuid)
 
     def __str__(self):
-        return self.UID.username + " to " + self.targetID.username
+        usr = getUserFromUID(self.UID)
+        tar = getUserFromUID(self.targetID)
+        return usr.username + " to " + tar.username
 
     class Meta:
         verbose_name = 'Review Connector'

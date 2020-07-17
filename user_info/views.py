@@ -17,6 +17,16 @@ def getUIDfromBoth(username):
             return "No registered user with the given username"
 
 
+def getUserFromUID(uid):
+    try:
+        return Individual.objects.get(UID=uid)
+    except:
+        try:
+            return Organisation.objects.get(UID=uid)
+        except:
+            return "Unable to find"
+
+
 def getUIDByName(username, type="Individual"):
     if type == "Individual" or type == "Organisation":
         try:
@@ -45,6 +55,26 @@ def profile(request, usr_id):
 def getUser(request):
     if request.method == 'GET':
         uid = request.GET['UID']
+        resp = getUserFromUID(uid)
+        if resp != "Unable to find":
+            return JsonResponse(resp.Serialize())
+        else:
+            return JsonResponse({"message": resp})
+
+
+def getUserInfo(request):
+    if request.method == 'GET':
+        uid = request.GET['UID']
+        resp = getUserFromUID(uid)
+        if resp != "Unable to find":
+            return JsonResponse(resp.SerializePartial())
+        else:
+            return JsonResponse({"message": resp})
+
+
+def getUserbyType(request):
+    if request.method == 'GET':
+        uid = request.GET['UID']
         type = request.GET['type']
         # print(uid, type)
         if type == 'Individual':
@@ -60,7 +90,7 @@ def getUser(request):
         return JsonResponse(resp.Serialize())
 
 
-def getUserInfo(request):
+def getUserInfobyType(request):
     if request.method == 'GET':
         username = request.GET['username']
         type = request.GET['type']
