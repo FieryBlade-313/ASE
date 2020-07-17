@@ -17,7 +17,7 @@ If all the above mentioned things are perfectly installed in your system then fo
    sudo mysql
    CREATE DATABASE ~dbname~;
    CREATE USER ~usrName~@'localhost' IDENTIFIED BY ~user_password~;
-   GRANT ALL PRIVILEGES ON ~dbname~.* TO 'usrName'@'localhost';
+   GRANT ALL PRIVILEGES ON ~dbname~.* TO ~usrName~@'localhost';
    exit
    ```
 3. Configuring Django to use the created Database
