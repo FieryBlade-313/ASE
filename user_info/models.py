@@ -194,7 +194,8 @@ class FOI(models.Model):
     JID = models.ForeignKey(Jobs, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.JID.name
+        usr = getUserFromUID(self.UID)
+        return usr.username + " " + self.JID.name
 
     class Meta:
         verbose_name = 'Field Of Interest'
