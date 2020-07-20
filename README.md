@@ -230,3 +230,30 @@ This repo consists the backend of our ASE project, created by Sathya and Fauz.
      This API details of all Registered Individuals or Organisations and their corresponding job.
      
    
+## Using our SMS API
+ ##### For Registration you can use the Default Keyword and Mobile Number provided in the website 
+ 
+ Once you register with our website you will be provided
+ a dedicated number and keyword which you can use to  make queries
+ 
+Please send the below Messages to the dedicated number provided to you
+(**Strictly follow the format**)
+ 
+ * ### Registration through SMS  
+        
+        <keyword>,<Your_Name>,<Your_Username>,<Your_Password>,<Your_Email_ID>  
+      
+ * ### Search Jobs near any location
+    
+        <keyword>,<Your_Username>,<Pincode>
+        
+        
+ * ### View Profile
+    
+        <keyword>,<Your_Username>
+        
+        
+ 
+     
+     
+        
