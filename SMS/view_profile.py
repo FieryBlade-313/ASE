@@ -42,8 +42,15 @@ def view_profile(message,number):
             mobile= item['mobile']
             break
     if not present:
-        print('You are not registered !!')
-        f.write('You are not registered !!'+'\n')
+        out_str = 'You are not registered !!' 
+        print(out_str)
+        f.write(out_str+'\n')
+        
+    elif mobile!=str(number)[2:]:
+        out_str = 'Please Send a message from your Registered Mobile Number '
+        print(out_str)
+        f.write(out_str+'\n')
+        
     else:
         out_str = 'Your profile\n'
         print(out_str)
