@@ -22,7 +22,7 @@ This repo consists the backend of our ASE project, created by Sathya and Fauz.
     
     * `http://127.0.0.1:8000/api/getUserInfo?username=~username~` (GET request)
     
-     This API gives partial info of a user having `~username~ as their username.
+     This API gives partial info of a user having `~username~` as their username.
     
 * #### Register API
 
