@@ -239,16 +239,16 @@ This repo consists the backend of our ASE project, created by Sathya and Fauz.
 Please send the below Messages to the dedicated number provided to you
 (**Strictly follow the format**)
  
- * ###Registration through SMS  
+ * ### Registration through SMS  
         
         <keyword>,<Your_Name>,<Your_Username>,<Your_Password>,<Your_Email_ID>  
       
- * ###Search Jobs near any location
+ * ### Search Jobs near any location
     
         <keyword>,<Your_Username>,<Pincode>
         
         
- * ###View Profile
+ * ### View Profile
     
         <keyword>,<Your_Username>
         
